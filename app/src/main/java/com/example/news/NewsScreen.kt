@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.news
 
 import android.content.Intent
@@ -34,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +50,7 @@ fun NewsScreen(
 ) {
     val newsList by viewModel.newsList // Observing news list
     var selectedLanguage by rememberSaveable { mutableStateOf("en") }   // Language State (Default EN)
-    var selectedType by rememberSaveable { mutableStateOf("technology") }   // Category State ( Default Technology)
+    var selectedType by rememberSaveable { mutableStateOf("") }   // Category State ( Default Technology)
     var selectedCountry by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(selectedType, selectedLanguage, selectedCountry) {
@@ -71,14 +76,18 @@ fun NewsScreen(
         content = { innerPadding ->     // Screen content with padding
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 if (newsList.isEmpty()) {       // If news content empty shows CircularProgressIndicator
-                    Box(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
-                        contentAlignment = Alignment.Center         // Circular prog indi aligned to center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 20.dp)
+                    )
+                        {
+                            items(10) {                             // Show 10 placeholder cards
+                                NewsShimmerPlaceholder()
+                            }
+                        }
                 } else {
                     LazyColumn(                 // List of articles in lazyColumn
                         modifier = Modifier
@@ -505,6 +514,42 @@ fun FABMenu(                                    // Floating Action Bar Menu
                         .background(MaterialTheme.colorScheme.onSecondary)
                 )
             }
+        }
+    }
+}
+// Shimmer Effect
+@Composable
+fun NewsShimmerPlaceholder() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        // Title line placeholder
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(20.dp)
+                .placeholder(
+                    visible = true,
+                    highlight = PlaceholderHighlight.shimmer()
+                )
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Description lines placeholder (can show 2-3 lines)
+        repeat(3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(16.dp)
+                    .placeholder(
+                        visible = true,
+                        highlight = PlaceholderHighlight.shimmer()
+                    )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
         }
     }
 }
