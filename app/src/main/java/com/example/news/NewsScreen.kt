@@ -38,21 +38,22 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
+import com.google.accompanist.placeholder.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewsScreen(
-    viewModel: NewsViewModel,       // Call Viewmodel for news
+    viewModel: NewsViewModel,       // Call Viewmodel for news ( News data and Logic )
     isDarkMode: Boolean,            // Current theme mode
     onToggleTheme: () -> Unit,      // Callback to toggle theme
     navController: NavController    // Added NavController parameter
 ) {
     val newsList by viewModel.newsList // Observing news list
     var selectedLanguage by rememberSaveable { mutableStateOf("en") }   // Language State (Default EN)
-    var selectedType by rememberSaveable { mutableStateOf("") }   // Category State ( Default Technology)
+    var selectedType by rememberSaveable { mutableStateOf("") }   // Category State
     var selectedCountry by rememberSaveable { mutableStateOf<String?>(null) }
 
+    // Fetch news whenever Language, Category, Country changes
     LaunchedEffect(selectedType, selectedLanguage, selectedCountry) {
         viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry)
     }
@@ -75,28 +76,26 @@ fun NewsScreen(
         },
         content = { innerPadding ->     // Screen content with padding
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                if (newsList.isEmpty()) {       // If news content empty shows CircularProgressIndicator
+                if (newsList.isEmpty()) {       // If news content empty shows ShimmerEffects
                     LazyColumn(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
+                            .fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         contentPadding = PaddingValues(bottom = 20.dp)
                     )
                         {
                             items(10) {                             // Show 10 placeholder cards
-                                NewsShimmerPlaceholder()
+                                NewsShimmerPlaceholder(isDarkMode = isDarkMode)
                             }
                         }
-                } else {
+                } else {                        // Display actual news when loaded
                     LazyColumn(                 // List of articles in lazyColumn
                         modifier = Modifier
                             .fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),  // Space between items
-                        contentPadding = PaddingValues(bottom = 20.dp)      // Screen bottom padding
+                        contentPadding = PaddingValues(bottom = 20.dp)              // Screen bottom padding
                     ) {
-                        items(newsList) { article ->           // iterates over article
-                            NewsItem(article) {                        // Show news Card
+                        items(newsList) { article ->                        // iterates over article
+                            NewsItem(article) {                                    // Show news Card
                                 // Save clicked article in back stack
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "article",
@@ -320,11 +319,13 @@ fun FABMenu(                                    // Floating Action Bar Menu
     selectedCountry: String?,
     onSelectCountry: (String?) -> Unit
 ) {
+    // Track FAB and individual dropdown visibility
     var isMenuExpanded by rememberSaveable { mutableStateOf(false) }            // Track FAB open/close
     var isLanguageMenuVisible by remember { mutableStateOf(false) }             // Track Language menu
     var isTypeMenuVisible by remember { mutableStateOf(false) }                 // Track Category Menu
     var isCountryMenuVisible by remember { mutableStateOf(false) }              // Track Country Menu
 
+    // Drop Down options
     val languages = listOf("en", "es", "fr", "de", "hi")                                // List of Languages
     val types = listOf(null, "technology", "games", "sports", "business", "health")     // List of Category
     val countries = listOf(null, "us", "in", "gb", "de", "fr")                          // List of Countries
@@ -334,10 +335,10 @@ fun FABMenu(                                    // Floating Action Bar Menu
         contentAlignment = Alignment.BottomStart                                        // Aligned Bottom Start
     ) {
 
-        AnimatedVisibility(visible = isMenuExpanded) {                                  // Show menu when expanded
+        AnimatedVisibility(visible = isMenuExpanded) {                                  // Show menu when expanded ( Animated usingAnimatedVisibility )
             Column(
                 modifier = Modifier
-                    .offset(y = (-60).dp)                                               // anchored above FAB
+                    .offset(y = (-60).dp)                                               // anchored above FAB using offset
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(12.dp)
@@ -349,12 +350,12 @@ fun FABMenu(                                    // Floating Action Bar Menu
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onToggleTheme() }
+                        .clickable { onToggleTheme() }                      // Theme toggle
                         .padding(8.dp)
                 ) {
                     Text("Appearance", modifier = Modifier.weight(1f))
                     Icon(
-                        imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,  // Switch between sun and moon
                         contentDescription = "Toggle Theme"
                     )
                 }
@@ -365,7 +366,7 @@ fun FABMenu(                                    // Floating Action Bar Menu
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isCountryMenuVisible = !isCountryMenuVisible }
+                            .clickable { isCountryMenuVisible = !isCountryMenuVisible }     // When clicked checks dropdown true or false
                             .padding(8.dp)
                     ) {
                         Text("Country", modifier = Modifier.weight(1f))
@@ -380,16 +381,16 @@ fun FABMenu(                                    // Floating Action Bar Menu
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
                                 .padding(8.dp)
                         ) {
-                            countries.forEach { country ->
-                                val display = country?.uppercase() ?: "ALL"
+                            countries.forEach { country ->              // forEach loop over list and makes clickable
+                                val display = country?.uppercase() ?: "ALL"     // List upper case
                                 Text(
                                     text = display,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable {
-                                            onSelectCountry(country)
-                                            isCountryMenuVisible = false
-                                            isMenuExpanded = false
+                                        .clickable {                    // when clicked rules
+                                            onSelectCountry(country)    // close when selected
+                                            isCountryMenuVisible = false    // close country menu
+                                            isMenuExpanded = false          // Close FAB menu
                                         }
                                         .padding(8.dp)
                                 )
@@ -404,14 +405,14 @@ fun FABMenu(                                    // Floating Action Bar Menu
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isLanguageMenuVisible = !isLanguageMenuVisible }   // When clicked makes the Language menu visible and invisible
+                            .clickable { isLanguageMenuVisible = !isLanguageMenuVisible }   // When clicked checks dropdown true or false
                             .padding(8.dp)
                     ) {
                         Text("Language", modifier = Modifier.weight(1f))
                         Text(selectedLanguage.uppercase(), fontWeight = FontWeight.Bold)
                     }
 
-                    AnimatedVisibility(isLanguageMenuVisible) {     // Expand Language list when clicked
+                    AnimatedVisibility(isLanguageMenuVisible) {     // IF true dropdown menu is shown
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -424,10 +425,10 @@ fun FABMenu(                                    // Floating Action Bar Menu
                                     text = lang.uppercase(),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable {                    // Conditions for clickable
-                                            onSelectLanguage(lang)      // Select Language
-                                            isLanguageMenuVisible = false
-                                            isMenuExpanded = false
+                                        .clickable {                    // when clicked rules
+                                            onSelectLanguage(lang)      // close when selected
+                                            isLanguageMenuVisible = false  // close lang menu
+                                            isMenuExpanded = false          // close FAB menu
                                         }
                                         .padding(8.dp)
                                 )
@@ -442,12 +443,12 @@ fun FABMenu(                                    // Floating Action Bar Menu
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isTypeMenuVisible = !isTypeMenuVisible }       // When clicked makes the Category menu visible and invisible
+                            .clickable { isTypeMenuVisible = !isTypeMenuVisible }       // When clicked checks dropdown true or false
                             .padding(8.dp)
                     ) {
                         Text("Category", modifier = Modifier.weight(1f))
-                        Text(if (selectedType.isBlank()) "ALL"
-                            else selectedType.replaceFirstChar { it.uppercase() },
+                        Text(if (selectedType.isBlank()) "ALL"                      // If left blank All is default
+                            else selectedType.replaceFirstChar { it.uppercase() },        // First character in list upper case "null" -> "ALL"
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -519,7 +520,7 @@ fun FABMenu(                                    // Floating Action Bar Menu
 }
 // Shimmer Effect
 @Composable
-fun NewsShimmerPlaceholder() {
+fun NewsShimmerPlaceholder(isDarkMode: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -532,7 +533,10 @@ fun NewsShimmerPlaceholder() {
                 .height(20.dp)
                 .placeholder(
                     visible = true,
-                    highlight = PlaceholderHighlight.shimmer()
+                    color = if (isDarkMode) Color.DarkGray else Color.LightGray,     // Base color
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = if (isDarkMode) Color.Gray else Color.White  // Highlight color
+                    )
                 )
         )
 
@@ -546,7 +550,10 @@ fun NewsShimmerPlaceholder() {
                     .height(16.dp)
                     .placeholder(
                         visible = true,
-                        highlight = PlaceholderHighlight.shimmer()
+                        color = if (isDarkMode) Color.DarkGray else Color.LightGray,     // Base color
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = if (isDarkMode) Color.Gray else Color.White  // Highlight color
+                        )
                     )
             )
             Spacer(modifier = Modifier.height(4.dp))
