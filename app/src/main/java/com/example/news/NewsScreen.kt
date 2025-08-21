@@ -46,6 +46,11 @@ fun NewsScreen(
     val newsList by viewModel.newsList // Observing news list
     var selectedLanguage by rememberSaveable { mutableStateOf("en") }   // Language State (Default EN)
     var selectedType by rememberSaveable { mutableStateOf("technology") }   // Category State ( Default Technology)
+    var selectedCountry by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(selectedType, selectedLanguage, selectedCountry) {
+        viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry)
+    }
 
     Scaffold(                           // Main Layout Structure
         topBar = {                      // Top App Bar
@@ -106,12 +111,17 @@ fun NewsScreen(
                         selectedLanguage = selectedLanguage,
                         onSelectLanguage = { lang ->
                             selectedLanguage = lang
-                            viewModel.fetchNews(selectedType, selectedLanguage) // re-fetch (Reloads News)
+                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry) // re-fetch (Reloads News)
                         },
                         selectedType = selectedType,
                         onSelectType = { type ->
                             selectedType = type
                             viewModel.fetchNews(selectedType, selectedLanguage) // re-fetch (Reloads News)
+                        },
+                        selectedCountry = selectedCountry,
+                        onSelectCountry = { country ->
+                            selectedCountry = country
+                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry)
                         }
                     )
                 }
@@ -245,7 +255,30 @@ fun ArticleScreen(      // Article Screen open from main screen when clicked on 
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            article.source_name?.let { source ->
+                Text(
+                    text = "Source: $source",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray, fontWeight = FontWeight.Medium),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            article.country?.let { countries ->
+                val countryText = if (countries.isNotEmpty()) countries.joinToString(", "){ it.uppercase() }
+                else{ "N/A" }
+                Text(
+                    text = "Country: $countryText",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
         }
     }
 }
@@ -257,24 +290,28 @@ fun FABMenu(                                    // Floating Action Bar Menu
     selectedLanguage: String,
     onSelectLanguage: (String) -> Unit,
     selectedType: String,
-    onSelectType: (String) -> Unit
+    onSelectType: (String) -> Unit,
+    selectedCountry: String?,
+    onSelectCountry: (String?) -> Unit
 ) {
     var isMenuExpanded by rememberSaveable { mutableStateOf(false) }            // Track FAB open/close
     var isLanguageMenuVisible by remember { mutableStateOf(false) }             // Track Language menu
     var isTypeMenuVisible by remember { mutableStateOf(false) }                 // Track Category Menu
+    var isCountryMenuVisible by remember { mutableStateOf(false) }              // Track Country Menu
 
     val languages = listOf("en", "es", "fr", "de", "hi")                                // List of Languages
-    val types = listOf("technology", "games", "sports", "business", "health")           // List of Category
+    val types = listOf(null, "technology", "games", "sports", "business", "health")     // List of Category
+    val countries = listOf(null, "us", "in", "gb", "de", "fr")                          // List of Countries
 
     Box(                                                                                // Box to anchor FAB
         modifier = Modifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.BottomStart                                        // Aligned Bottom Start
     ) {
 
-        AnimatedVisibility(visible = isMenuExpanded) {          // Show menu when expanded
+        AnimatedVisibility(visible = isMenuExpanded) {                                  // Show menu when expanded
             Column(
                 modifier = Modifier
-                    .offset(y = (-60).dp)                       // anchored above FAB
+                    .offset(y = (-60).dp)                                               // anchored above FAB
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(12.dp)
@@ -294,6 +331,45 @@ fun FABMenu(                                    // Floating Action Bar Menu
                         imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
                         contentDescription = "Toggle Theme"
                     )
+                }
+
+                // Country selector
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isCountryMenuVisible = !isCountryMenuVisible }
+                            .padding(8.dp)
+                    ) {
+                        Text("Country", modifier = Modifier.weight(1f))
+                        Text(selectedCountry?.uppercase() ?: "ALL", fontWeight = FontWeight.Bold)
+                    }
+
+                    AnimatedVisibility(isCountryMenuVisible) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .padding(8.dp)
+                        ) {
+                            countries.forEach { country ->
+                                val display = country?.uppercase() ?: "ALL"
+                                Text(
+                                    text = display,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onSelectCountry(country)
+                                            isCountryMenuVisible = false
+                                            isMenuExpanded = false
+                                        }
+                                        .padding(8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
 
                 // Language selector
@@ -344,8 +420,8 @@ fun FABMenu(                                    // Floating Action Bar Menu
                             .padding(8.dp)
                     ) {
                         Text("Category", modifier = Modifier.weight(1f))
-                        Text(
-                            selectedType.replaceFirstChar { it.uppercase() },
+                        Text(if (selectedType.isBlank()) "ALL"
+                            else selectedType.replaceFirstChar { it.uppercase() },
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -359,12 +435,13 @@ fun FABMenu(                                    // Floating Action Bar Menu
                                 .padding(8.dp)
                         ) {
                             types.forEach { type ->
+                                val display = type?.replaceFirstChar { it.uppercase() } ?: "ALL"
                                 Text(
-                                    text = type.replaceFirstChar { it.uppercase() },
+                                    text = display,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            onSelectType(type)
+                                            onSelectType(type ?: "") // Pass empty string for "ALL"
                                             isTypeMenuVisible = false
                                             isMenuExpanded = false
                                         }

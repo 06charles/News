@@ -11,22 +11,23 @@ class NewsRepository {
     private val apiKey = "pub_eba1001b999449e5bf2e0570ac9250ae" // API key
     private val baseUrl = "https://newsdata.io/api/1/news"      // Base API URL
     private val defaultLanguage = "en"  // Default language
-    private val defaultCountry: String? = null // News from Country if news wanted from specific country change here
-
     // Accepts optional type and language, defaulting to "technology" and defaultLanguage
     suspend fun getNews(
-        type: String = "technology",
-        language: String = defaultLanguage
+        type: String? = null,
+        language: String = defaultLanguage,
+        country: String? = null
     ): NewsResponse {
         return try {
-            Log.d("NewsRepository", "Fetching News: type=$type, language=$language")
+            Log.d("NewsRepository", "Fetching News: type=$type, language=$language, country=$country")
 
             val response: NewsResponse = NetworkModule.client.get(baseUrl) {
                 url(baseUrl)
                 parameter("apikey", apiKey)        // API key will be integrated
                 parameter("language", language)    // Language will be integrated
-                parameter("q", type)               // Type of news
-                defaultCountry?.let { parameter("country", it) }  // Country will be integrated
+                if (!type.isNullOrBlank()) {       // Add "q" only if user selected a category
+                    parameter("q", type)
+                }                                 // Type of news
+                country?.let { parameter("country", it) } // Country will be integrated
                 contentType(ContentType.Application.Json)  // Specifies that we want JSON in response
             }.body() // Converts JSON response into data class for NewsRepository
 

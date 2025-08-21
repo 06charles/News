@@ -19,16 +19,24 @@ data class NewsResponse(
 }
 
 @Serializable
-@Parcelize
+@Parcelize      // To pass the object between Activities, Fragments, or Bundles.
 // Represents a single news article
 data class Article(
     val title: String? = null,        // News title
     val link: String? = null,         // Link to full article
     val description: String? = null,  // Short description
     val image_url: String? = null,    // Image URL
-    val pubDate: String? = null       // Published date
+    val pubDate: String? = null,       // Published date
+    val source_id: String? = null,    // some APIs use "source_id"
+    val source_name: String? = null,  // readable source name
+    val country: List<String>? = null // some APIs return multiple countries
 ) : Parcelable {
     init {
         Log.d("Article", "Article Created")
     }
 }
+
+/*
+@Serializable → For network / storage (JSON, API calls)
+@Parcelize → For in-app passing (Navigation, Intents, Bundles)
+ */
