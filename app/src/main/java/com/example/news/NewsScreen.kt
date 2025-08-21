@@ -224,13 +224,21 @@ fun ArticleScreen(      // Article Screen open from main screen when clicked on 
 
             Spacer(modifier = Modifier.height(10.dp))
 
-                Text(                                               // Article Published Date
-                    text = article.pubDate ?: "No Published Date",  // Published Date fetched from data class
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color.Gray
-                    ),
+            Row {
+                Text(
+                    text = "Published: ${article.pubDate ?: "N/A"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                article.pubDateTZ?.let {
+                    Text(
+                        text = " Time Zone: ($it)",                                   // Timezone right after pubDate
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -257,12 +265,21 @@ fun ArticleScreen(      // Article Screen open from main screen when clicked on 
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            article.source_name?.let { source ->
+            Column {
                 Text(
-                    text = "Source: $source",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray, fontWeight = FontWeight.Medium),
+                    text = "Source: ${article.source_id ?: "Unknown"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                article.source_url?.let {
+                    Text(
+                        text = "URL: $it",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
