@@ -46,7 +46,7 @@ fun NewsScreen(
     viewModel: NewsViewModel,       // Call Viewmodel for news ( News data and Logic )
     isDarkMode: Boolean,            // Current theme mode
     onToggleTheme: () -> Unit,      // Callback to toggle theme
-    navController: NavController    // Added NavController parameter
+    navController: NavController    // Added NavController parameter        // NavController manages navigation
 ) {
     val newsList by viewModel.newsList // Observing news list
     var selectedLanguage by rememberSaveable { mutableStateOf("en") }   // Language State (Default EN)
@@ -92,11 +92,16 @@ fun NewsScreen(
                     LazyColumn(                 // List of articles in lazyColumn
                         modifier = Modifier
                             .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                         contentPadding = PaddingValues(bottom = 20.dp)              // Screen bottom padding
                     ) {
                         items(newsList) { article ->                        // iterates over article
                             NewsItem(article) {                                    // Show news Card
                                 // Save clicked article in back stack
+                                // Save the clicked article in the current back stack entry's SavedStateHandle
+                                // `currentBackStackEntry` refers to the currently visible destination in the NavController's back stack.
+                                // `savedStateHandle` is a key-value storage attached to a back stack entry that survives configuration changes (like screen rotation).
+                                // Using `.set("article", article)` stores the article object under the key "article" so that the next screen can retrieve it safely.
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
                                     "article",
                                     article
@@ -119,17 +124,17 @@ fun NewsScreen(
                         selectedLanguage = selectedLanguage,
                         onSelectLanguage = { lang ->
                             selectedLanguage = lang
-                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry) // re-fetch (Reloads News)
+                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry) // re-fetch (Reloads News) with Language modifications
                         },
                         selectedType = selectedType,
                         onSelectType = { type ->
                             selectedType = type
-                            viewModel.fetchNews(selectedType, selectedLanguage) // re-fetch (Reloads News)
+                            viewModel.fetchNews(selectedType, selectedLanguage) // re-fetch (Reloads News) with Category modifications
                         },
                         selectedCountry = selectedCountry,
                         onSelectCountry = { country ->
                             selectedCountry = country
-                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry)
+                            viewModel.fetchNews(selectedType, selectedLanguage, selectedCountry)    // re-fetch (Reloads News) with Country modifications
                         }
                     )
                 }
