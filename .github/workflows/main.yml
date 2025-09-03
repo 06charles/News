@@ -25,20 +25,23 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      #Build Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
+      #Run Unit Tests
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testDebugUnitTest --stacktrace
 
+      #Run Lint
       - name: Run Lint
-        run: ./gradlew lint
+        run: ./gradlew lintDebug --stacktrace
 
   deploy:
     name: Deploy APK
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'   # 🔥 fixed: matches your branch
 
     steps:
       - uses: actions/checkout@v3
