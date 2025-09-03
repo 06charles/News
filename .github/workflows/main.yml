@@ -81,5 +81,6 @@ jobs:
         with:
           name: Reports
           path: |
-            app/build/reports/lint/lintDebug.html
-            app/build/reports/tests/testDebugUnitTest/index.html
+             app/build/reports/lint/lintDebug.html
+             app/build/reports/lint-results-debug.html
+             app/build/reports/tests/testDebugUnitTest/index.html
