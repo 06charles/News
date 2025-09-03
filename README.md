@@ -1,9 +1,8 @@
 # My Compose App
 A simple Android app built with **Jetpack Compose** and **Material 3**.  
-Includes an animated splash screen, floating action button menu, and navigation.
+Includes floating action button menu, and navigation.
 
 ## Features
-- Animated splash screen  
 - Dark/Light theme toggle  
 - Language, Category, and Country filters  
 - Jetpack Compose UI with Material 3  
