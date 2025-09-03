@@ -74,3 +74,12 @@ jobs:
         with:
           name: News-debug.apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+       # Upload Reports (Lint + Unit Test HTML)
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reports
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/tests/testDebugUnitTest/index.html
