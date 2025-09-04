@@ -5,7 +5,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  workflow_dispatch:
 
 jobs:
   lint:
@@ -13,88 +12,65 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
           cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run Lint
-        run: ./gradlew lintDebug --stacktrace || true
-
-      - name: Upload Lint Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: lint-report
-          path: |
-            app/build/reports/lint/lintDebug.html
-            app/build/reports/lint-results-debug.html
+        run: ./gradlew lintDebug --stacktrace
 
   test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
-    needs: lint
+    needs: lint   # Run only if lint passes
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
           cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --stacktrace || true
-
-      - name: Upload Unit Test Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-report
-          path: app/build/reports/tests/testDebugUnitTest/
+        run: ./gradlew testDebugUnitTest --stacktrace
 
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    needs: test
+    needs: test   # Run only if tests pass
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
           cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace || true
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: News-debug.apk
           path: app/build/outputs/apk/debug/app-debug.apk
-
-    #  - name: Upload All Reports
-    #    uses: actions/upload-artifact@v4
-    #    with:
-    #      name: reports
-    #      path: |
-    #        app/build/reports/lint/lintDebug.html
-    #        app/build/reports/lint-results-debug.html
-    #        app/build/reports/tests/testDebugUnitTest/index.html
