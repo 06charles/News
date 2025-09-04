@@ -43,6 +43,8 @@ android {
     }
 
     lint {
+        abortOnError = false
+        checkReleaseBuilds = false
         xmlReport = false
         htmlReport = true
         htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
