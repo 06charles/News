@@ -47,7 +47,7 @@ android {
         checkReleaseBuilds = false
         xmlReport = false
         htmlReport = true
-        htmlOutput = file("$buildDir/reports/lint/lint-report.html"")
+        htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
     }
 
     testOptions {
