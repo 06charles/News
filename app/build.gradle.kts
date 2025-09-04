@@ -19,44 +19,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-         buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
-    }
-
-    // Correct place for Lint
-    lint {
-        xmlReport = false
-        htmlReport = true
-        htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
-    }
-
-    // Correct place for Unit Test reports
-    testOptions {
-        unitTests.all {
-            reports {
-                html.required.set(true)
-                junitXml.required.set(true)
-            }
-        }
-    }
     }
 
     buildTypes {
@@ -68,6 +30,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -78,8 +41,22 @@ android {
     buildFeatures {
         compose = true
     }
-}
 
+    lint {
+        xmlReport = false
+        htmlReport = true
+        htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
+    }
+
+    testOptions {
+        unitTests.all {
+            reports {
+                html.required.set(true)
+                junitXml.required.set(true)
+            }
+        }
+    }
+}
 dependencies {
 
     // Ktor for HTTP request
