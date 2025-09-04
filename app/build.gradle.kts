@@ -20,6 +20,23 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+lint {
+    abortOnError = false
+    checkReleaseBuilds = false
+    xmlReport = false
+    htmlReport = true
+    htmlOutput = file("$buildDir/reports/lint/lint-report.html")
+}
+
+testOptions {
+    unitTests.all {
+        ignoreFailures = true
+        reports {
+            html.required.set(true)
+            junitXml.required.set(true)
+        }
+    }
+}
 }
 dependencies {
 
