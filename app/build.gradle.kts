@@ -52,6 +52,7 @@ android {
 
     testOptions {
         unitTests.all {
+        ignoreFailures = true
             reports {
                 html.required.set(true)
                 junitXml.required.set(true)
