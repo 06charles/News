@@ -31,10 +31,8 @@ lint {
 testOptions {
     unitTests.all {
         ignoreFailures = true
-        reports {
-            html.required.set(true)
-            junitXml.required.set(true)
-        }
+        it.reports.html.required.set(true)
+        it.reports.junitXml.required.set(true)
     }
 }
 }
