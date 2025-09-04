@@ -47,12 +47,13 @@ android {
         checkReleaseBuilds = false
         xmlReport = false
         htmlReport = true
-        htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
+        htmlOutput = file("$buildDir/reports/lint/lint-report.html"")
     }
 
     testOptions {
         unitTests.all {
         ignoreFailures = true
+        it.reports.html.required.set(true)
             reports {
                 html.required.set(true)
                 junitXml.required.set(true)
