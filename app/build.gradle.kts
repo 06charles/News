@@ -26,7 +26,7 @@ android {
         checkReleaseBuilds = false
         xmlReport = true
         htmlReport = true
-        htmlOutput = project.layout.buildDirectory.file("reports/lint/lint-report.html").asFile
+        htmlOutput = project.layout.buildDirectory.file("reports/lint/lint-report.html").get().asFile
     }
 
     testOptions {
