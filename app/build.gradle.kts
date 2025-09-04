@@ -31,7 +31,7 @@ android {
 
     testOptions {
         unitTests.all {
-            it.isIgnoreFailures = true
+            ignoreFailures = true
             it.reports.html.required.set(true)
             it.reports.junitXml.required.set(true)
         }
