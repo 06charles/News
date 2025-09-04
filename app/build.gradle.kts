@@ -19,6 +19,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+          lint {
+        xmlReport false
+        htmlReport true
+        htmlOutput file("$buildDir/reports/lint/lintDebug.html")
+        }
+
+         testOptions {
+        unitTests.all {
+            reports {
+                html.required.set(true)
+                junitXml.required.set(true)
+                    }
+              }
+         }
     }
 
     buildTypes {
