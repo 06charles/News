@@ -26,12 +26,14 @@ android {
         checkReleaseBuilds = false
         xmlReport = true
         htmlReport = true
-        htmlOutput = project.layout.buildDirectory.file("reports/lint/lint-report.html").get().asFile
+        htmlOutput =
+            project.layout.buildDirectory.file("reports/lint/lint-report.html").get().asFile
     }
+
 
     testOptions {
         unitTests.all {
-            ignoreFailures = true
+            it.ignoreFailures = true
             it.reports.html.required.set(true)
             it.reports.junitXml.required.set(true)
         }

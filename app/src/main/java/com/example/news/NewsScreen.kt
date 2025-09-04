@@ -476,6 +476,7 @@ fun FABMenu(                                    // Floating Action Bar Menu
                                             onSelectType(type ?: "") // Pass empty string for "ALL"
                                             isTypeMenuVisible = false
                                             isMenuExpanded = false
+                                            isLanguageMenuVisible = false
                                         }
                                         .padding(8.dp)
                                 )
