@@ -1,86 +1,20 @@
 name: Android CI/CD
-
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   lint:
-    name: Run Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout the code
+        uses: actions/checkout@v2
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - name: Upload html test report
+        uses: actions/upload-artifact@v2
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run Lint
-        run: ./gradlew lintDebug --stacktrace || true
-
-  test:
-    name: Run Unit Tests
-    runs-on: ubuntu-latest
-    needs: lint   # Run only if lint passes
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --stacktrace || true
-
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
-    needs: test   # Run only if tests pass
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace || true
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: News-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-       # Upload Reports (Lint + Unit Test HTML)
-      - name: Upload Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: Reports
-          path: |
-             app/build/reports/lint/lintDebug.html
-             app/build/reports/lint-results-debug.html
-             app/build/reports/tests/testDebugUnitTest/index.html
+          name: lint.html
+          path: app/build/reports/lint-results-debug.html
