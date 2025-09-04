@@ -20,20 +20,43 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-          lint {
-        xmlReport false
-        htmlReport true
-        htmlOutput file("$buildDir/reports/lint/lintDebug.html")
+         buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
+    }
 
-         testOptions {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
+        compose = true
+    }
+
+    // Correct place for Lint
+    lint {
+        xmlReport = false
+        htmlReport = true
+        htmlOutput = file("$buildDir/reports/lint/lintDebug.html")
+    }
+
+    // Correct place for Unit Test reports
+    testOptions {
         unitTests.all {
             reports {
                 html.required.set(true)
                 junitXml.required.set(true)
-                    }
-              }
-         }
+            }
+        }
+    }
     }
 
     buildTypes {
