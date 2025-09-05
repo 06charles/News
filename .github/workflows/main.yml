@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,6 +37,7 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -51,12 +53,60 @@ jobs:
           name: unit-test-report
           path: app/build/reports/tests/**/index.html
 
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
+  instrumentation-test:
+    name: Run Instrumentation Tests (Espresso)
+    runs-on: macos-latest
     needs: test
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Run Espresso Tests on Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: google_apis
+          profile: pixel_4
+          script: ./gradlew connectedCheck --stacktrace
+
+      - name: Upload Instrumentation Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumentation-test-report
+          path: app/build/reports/androidTests/connected/
+
+  static-code-analysis:
+    name: Run Static Code Analysis (SonarCloud)
+    runs-on: ubuntu-latest
+    needs: instrumentation-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: SonarCloud Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew app:sonarqube --stacktrace
+
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    needs: static-code-analysis
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -80,6 +130,7 @@ jobs:
             app/build/reports/lint-results*.html
             app/build/reports/lint/*.html
             app/build/reports/tests/**/index.html
+            app/build/reports/androidTests/connected/**
 
   deploy:
     name: Deploy APK
@@ -97,4 +148,8 @@ jobs:
         run: |
           echo "🚀 Deploying APK..."
           ls -lh ./output
-          # Add deploy logic here, e.g. upload to Firebase App Distribution / Play Store
+          # Example deployment (Firebase App Distribution):
+          # firebase appdistribution:distribute ./output/app-debug.apk \
+          #   --app ${{ secrets.FIREBASE_APP_ID }} \
+          #   --groups testers \
+          #   --token ${{ secrets.FIREBASE_TOKEN }}
