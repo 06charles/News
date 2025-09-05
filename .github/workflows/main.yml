@@ -75,12 +75,6 @@ jobs:
           name: build-apk
           path: app/build/outputs/apk/debug/*.apk
 
-      - name: Upload All Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: app/build/reports
-
   deploy:
     name: Deploy APK
     runs-on: ubuntu-latest
