@@ -27,8 +27,8 @@ jobs:
         with:
           name: lint-report
           path: |
-            app/build/reports/lint/lintDebug.html
-            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results*.html
+            app/build/reports/lint/*.html
 
   test:
     name: Run Unit Tests
@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
-          path: app/build/reports/tests/testDebugUnitTest/
+          path: app/build/reports/tests/**/index.html
 
   build:
     name: Build APK
@@ -77,9 +77,9 @@ jobs:
         with:
           name: reports
           path: |
-            app/build/reports/lint/lintDebug.html
-            app/build/reports/lint-results-debug.html
-            app/build/reports/tests/testDebugUnitTest/index.html
+            app/build/reports/lint-results*.html
+            app/build/reports/lint/*.html
+            app/build/reports/tests/**/index.html
 
   deploy:
     name: Deploy APK
